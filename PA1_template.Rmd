@@ -14,7 +14,7 @@ library(ggplot2)
 opts_chunk$set(echo = TRUE, results = "asis")
 ```
 
-####First of all, lets load the data and convert the columns to the required data types.
+First of all, lets load the data and convert the columns to the required data types.
 
 ```{r Q1, cache=TRUE, results='hide'}
 library(xtable)
@@ -25,8 +25,8 @@ actDf <- read.table(actFile, header = TRUE, sep = ",", na.strings = "NA", colCla
 actDf$date <- as.Date(actDf$date,"%Y-%m-%d")
 ```
 
-####Let us analyse more about the number of steps taken on each day.
-####The below histogram dsplays the data distribution of the total number of steps taken on each day
+Let us analyse more about the number of steps taken on each day.
+The below histogram dsplays the data distribution of the total number of steps taken on each day
 
 ```{r Q2}
 actT <- tbl_df(actDf)
@@ -37,7 +37,7 @@ hist(actSummary$dt_sum, xlab = "Total steps each day", main = "Histogram of the 
 
 ```
 
-####The below table displays the mean and median of the total number of steps taken on each day.
+The below table displays the mean and median of the total number of steps taken on each day.
 
 ```{r Q3}
 subActSum <- actSummary[,c(1,3,4)]
@@ -47,8 +47,8 @@ xt$Date <- as.character(xt$Date)
 print(xt, type="html")
 ```
 
-####Let us now try to understand the average daily activity pattern
-####Below is a time series plot of the 5-minute interval and the average number of steps taken, averaged across all days.
+Let us now try to understand the average daily activity pattern
+Below is a time series plot of the 5-minute interval and the average number of steps taken, averaged across all days.
 ```{r Q4.Q5}
 actIntSummary <- actT %>%
   group_by(interval) %>%
@@ -58,13 +58,13 @@ actIntOrder <- head(arrange(actIntSummary, desc(int_sum)),1)
 maxInt <- actIntOrder$interval
 maxStep <- actIntOrder$int_mean
 ```
-####The `r maxInt` 5-minute interval has the maximum number of average steps (`r maxStep`)
+The `r maxInt` 5-minute interval has the maximum number of average steps (`r maxStep`)
 
-####Note that there are a number of days/intervals where there are missing values. 
+Note that there are a number of days/intervals where there are missing values. 
 ```{r Q6}
 cntNAs <- sum(is.na(actDf$steps))
 ```
-####There are `r cntNAs' records with missing step counts for a given day/interval. We will now try to fill all of the missing values in the dataset with the the mean for that 5-minute interval to build the final tidy dataset.
+There are `r cntNAs' records with missing step counts for a given day/interval. We will now try to fill all of the missing values in the dataset with the the mean for that 5-minute interval to build the final tidy dataset.
 
 ```{r}
 actMerged <- merge(actDf,actIntSummary, by.x = "interval", by.y = "interval")
@@ -77,7 +77,7 @@ for(i in 1:nrow(actMerged)){
 actFinal <- actMerged[,c(1:3)]
 ```
 
-####Below is a histogram of the total number of steps taken each day and Calculate and report the mean and median total number of steps taken per day. 
+Below is a histogram of the total number of steps taken each day and Calculate and report the mean and median total number of steps taken per day. 
 
 ```{r}
 actFinalT <- tbl_df(actFinal)
@@ -88,20 +88,20 @@ hist(actFinalSumm$dt_sum, xlab = "Total steps each day", main = "Histogram of th
 
 ```
 
-####Let us now assess the impact of imputing the missing data.
-####Below is the summary statistics of the original data set which had missing values
+Let us now assess the impact of imputing the missing data.
+Below is the summary statistics of the original data set which had missing values
 ```{r}
 summary(actSummary$dt_sum)
 ```
 
-####Below is the summary statistics of the final data set after imputing the missing values.
+Below is the summary statistics of the final data set after imputing the missing values.
 ```{r}
 summary(actFinalSumm$dt_sum)
 ```
 
-####We conclude that there is not much significance difference after imputing the NAs.
+We conclude that there is not much significance difference after imputing the NAs.
 
-####Finally, let us analyse differences in activity patterns between weekdays and weekends
+Finally, let us analyse differences in activity patterns between weekdays and weekends
 
 ```{r}
 actFinal$day_type <- weekdays(actFinal$date)

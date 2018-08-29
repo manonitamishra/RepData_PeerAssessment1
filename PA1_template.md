@@ -23,7 +23,7 @@ output:
 ##     intersect, setdiff, setequal, union
 ```
 
-####First of all, lets load the data and convert the columns to the required data types.
+First of all, lets load the data and convert the columns to the required data types.
 
 
 ```r
@@ -35,8 +35,8 @@ actDf <- read.table(actFile, header = TRUE, sep = ",", na.strings = "NA", colCla
 actDf$date <- as.Date(actDf$date,"%Y-%m-%d")
 ```
 
-####Let us analyse more about the number of steps taken on each day.
-####The below histogram dsplays the data distribution of the total number of steps taken on each day
+Let us analyse more about the number of steps taken on each day.
+The below histogram dsplays the data distribution of the total number of steps taken on each day
 
 
 ```r
@@ -49,7 +49,7 @@ hist(actSummary$dt_sum, xlab = "Total steps each day", main = "Histogram of the 
 
 ![](PA1_template_files/figure-html/Q2-1.png)<!-- -->
 
-####The below table displays the mean and median of the total number of steps taken on each day.
+The below table displays the mean and median of the total number of steps taken on each day.
 
 
 ```r
@@ -61,7 +61,7 @@ print(xt, type="html")
 ```
 
 <!-- html table generated in R 3.3.3 by xtable 1.8-2 package -->
-<!-- Wed Aug 29 16:08:33 2018 -->
+<!-- Wed Aug 29 16:13:30 2018 -->
 <table border=1>
 <tr> <th>  </th> <th> Date </th> <th> Mean Steps </th> <th> Median Steps </th>  </tr>
   <tr> <td align="right"> 1 </td> <td align="right"> 2012-10-01 </td> <td align="right">  </td> <td align="right">  </td> </tr>
@@ -127,8 +127,8 @@ print(xt, type="html")
   <tr> <td align="right"> 61 </td> <td align="right"> 2012-11-30 </td> <td align="right">  </td> <td align="right">  </td> </tr>
    </table>
 
-####Let us now try to understand the average daily activity pattern
-####Below is a time series plot of the 5-minute interval and the average number of steps taken, averaged across all days.
+Let us now try to understand the average daily activity pattern
+Below is a time series plot of the 5-minute interval and the average number of steps taken, averaged across all days.
 
 ```r
 actIntSummary <- actT %>%
@@ -144,14 +144,14 @@ actIntOrder <- head(arrange(actIntSummary, desc(int_sum)),1)
 maxInt <- actIntOrder$interval
 maxStep <- actIntOrder$int_mean
 ```
-####The 835 5-minute interval has the maximum number of average steps (206.1698113)
+The 835 5-minute interval has the maximum number of average steps (206.1698113)
 
-####Note that there are a number of days/intervals where there are missing values. 
+Note that there are a number of days/intervals where there are missing values. 
 
 ```r
 cntNAs <- sum(is.na(actDf$steps))
 ```
-####There are `r cntNAs' records with missing step counts for a given day/interval. We will now try to fill all of the missing values in the dataset with the the mean for that 5-minute interval to build the final tidy dataset.
+There are `r cntNAs' records with missing step counts for a given day/interval. We will now try to fill all of the missing values in the dataset with the the mean for that 5-minute interval to build the final tidy dataset.
 
 
 ```r
@@ -165,7 +165,7 @@ for(i in 1:nrow(actMerged)){
 actFinal <- actMerged[,c(1:3)]
 ```
 
-####Below is a histogram of the total number of steps taken each day and Calculate and report the mean and median total number of steps taken per day. 
+Below is a histogram of the total number of steps taken each day and Calculate and report the mean and median total number of steps taken per day. 
 
 
 ```r
@@ -178,8 +178,8 @@ hist(actFinalSumm$dt_sum, xlab = "Total steps each day", main = "Histogram of th
 
 ![](PA1_template_files/figure-html/unnamed-chunk-2-1.png)<!-- -->
 
-####Let us now assess the impact of imputing the missing data.
-####Below is the summary statistics of the original data set which had missing values
+Let us now assess the impact of imputing the missing data.
+Below is the summary statistics of the original data set which had missing values
 
 ```r
 summary(actSummary$dt_sum)
@@ -188,7 +188,7 @@ summary(actSummary$dt_sum)
    Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
       0    6778   10400    9354   12810   21190 
 
-####Below is the summary statistics of the final data set after imputing the missing values.
+Below is the summary statistics of the final data set after imputing the missing values.
 
 ```r
 summary(actFinalSumm$dt_sum)
@@ -197,9 +197,9 @@ summary(actFinalSumm$dt_sum)
    Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
      41    9819   10770   10770   12810   21190 
 
-####We conclude that there is not much significance difference after imputing the NAs.
+We conclude that there is not much significance difference after imputing the NAs.
 
-####Finally, let us analyse differences in activity patterns between weekdays and weekends
+Finally, let us analyse differences in activity patterns between weekdays and weekends
 
 
 ```r
