@@ -1,25 +1,117 @@
 ---
-title: "Reproducible Research: Peer Assessment 1"
-output: 
-  html_document:
+title: "Activity Monitoring data analysis"
+output:
+  html_document: 
     keep_md: true
 ---
 
+```{r globals, echo=FALSE,results='hide'}
+library(rmarkdown)
+library(knitr)
+library(dplyr)
+library(xtable)
+library(ggplot2)
+opts_chunk$set(echo = TRUE, results = "asis")
+```
 
-## Loading and preprocessing the data
+####First of all, lets load the data and convert the columns to the required data types.
 
+```{r Q1, cache=TRUE, results='hide'}
+library(xtable)
+library(dplyr)
+download.file("https://d396qusza40orc.cloudfront.net/repdata%2Fdata%2Factivity.zip","activity.zip")
+actFile <- unzip("activity.zip")
+actDf <- read.table(actFile, header = TRUE, sep = ",", na.strings = "NA", colClasses = c("numeric","character","numeric"))
+actDf$date <- as.Date(actDf$date,"%Y-%m-%d")
+```
 
+####Let us analyse more about the number of steps taken on each day.
+####The below histogram dsplays the data distribution of the total number of steps taken on each day
 
-## What is mean total number of steps taken per day?
+```{r Q2}
+actT <- tbl_df(actDf)
+actSummary <- actT %>%
+  group_by(date) %>%
+  summarise(dt_sum = sum(steps, na.rm = TRUE), dt_mean = mean(steps, na.rm = TRUE), dt_median = median(steps, na.rm = TRUE))
+hist(actSummary$dt_sum, xlab = "Total steps each day", main = "Histogram of the total number of steps taken each day")
 
+```
 
+####The below table displays the mean and median of the total number of steps taken on each day.
 
-## What is the average daily activity pattern?
+```{r Q3}
+subActSum <- actSummary[,c(1,3,4)]
+names(subActSum) <- c("Date", "Mean Steps", "Median Steps")
+xt <- xtable(subActSum)
+xt$Date <- as.character(xt$Date)
+print(xt, type="html")
+```
 
+####Let us now try to understand the average daily activity pattern
+####Below is a time series plot of the 5-minute interval and the average number of steps taken, averaged across all days.
+```{r Q4.Q5}
+actIntSummary <- actT %>%
+  group_by(interval) %>%
+  summarise(int_sum = sum(steps, na.rm = TRUE), int_mean = mean(steps, na.rm = TRUE), int_median = median(steps, na.rm = TRUE))
+plot(actIntSummary$interval, actIntSummary$int_mean, type = "l", col = "red", xlab = "Time Interval", ylab = "Average number of steps")
+actIntOrder <- head(arrange(actIntSummary, desc(int_sum)),1)
+maxInt <- actIntOrder$interval
+maxStep <- actIntOrder$int_mean
+```
+####The `r maxInt` 5-minute interval has the maximum number of average steps (`r maxStep`)
 
+####Note that there are a number of days/intervals where there are missing values. 
+```{r Q6}
+cntNAs <- sum(is.na(actDf$steps))
+```
+####There are `r cntNAs' records with missing step counts for a given day/interval. We will now try to fill all of the missing values in the dataset with the the mean for that 5-minute interval to build the final tidy dataset.
 
-## Imputing missing values
+```{r}
+actMerged <- merge(actDf,actIntSummary, by.x = "interval", by.y = "interval")
 
+for(i in 1:nrow(actMerged)){
+  if(is.na(actMerged$steps[i])) {
+    actMerged$steps[i] <- actMerged$int_mean[i]
+  }
+}
+actFinal <- actMerged[,c(1:3)]
+```
 
+####Below is a histogram of the total number of steps taken each day and Calculate and report the mean and median total number of steps taken per day. 
 
-## Are there differences in activity patterns between weekdays and weekends?
+```{r}
+actFinalT <- tbl_df(actFinal)
+actFinalSumm <- actFinalT %>%
+  group_by(date) %>%
+  summarise(dt_sum = sum(steps, na.rm = TRUE), dt_mean = mean(steps, na.rm = TRUE), dt_median = median(steps, na.rm = TRUE))
+hist(actFinalSumm$dt_sum, xlab = "Total steps each day", main = "Histogram of the total number of steps taken each day")
+
+```
+
+####Let us now assess the impact of imputing the missing data.
+####Below is the summary statistics of the original data set which had missing values
+```{r}
+summary(actSummary$dt_sum)
+```
+
+####Below is the summary statistics of the final data set after imputing the missing values.
+```{r}
+summary(actFinalSumm$dt_sum)
+```
+
+####We conclude that there is not much significance difference after imputing the NAs.
+
+####Finally, let us analyse differences in activity patterns between weekdays and weekends
+
+```{r}
+actFinal$day_type <- weekdays(actFinal$date)
+setDayType <- function(x){
+  if(x == "Saturday" | x == "Sunday"){
+    "Weekend"
+  } else "Weekday"
+}
+actFinal$day_type <- sapply(actFinal$day_type,setDayType)
+actFinal$day_type <- factor(actFinal$day_type, levels = c("Weekday","Weekend"))
+g <- ggplot(actFinal, aes(interval, steps))
+g + geom_line(color = "blue") + facet_grid(day_type~.) + xlab("Interval") + ylab("Number of steps")
+```
